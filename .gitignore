@@ -1,0 +1,6 @@
+*__pycache__*
+rpi3/alexa_credentials
+rpi3/snap/parts
+rpi3/snap/prime
+rpi3/snap/stage
+rpi3/snap/*.snap

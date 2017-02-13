@@ -1,0 +1,38 @@
+name: alexa
+version: "1.0"
+summary: Amazon Alexa snap
+description: Add Amazon Alexa to your device
+confinement: devmode
+
+apps:
+  alexa:
+    command: bin/alexa.py
+    daemon: simple
+    plugs: [network, network-bind, pulseaudio]
+  alexa-run:
+    command: bin/alexa.py
+    plugs: [network, network-bind, pulseaudio]
+
+parts:
+  python-hyper:
+    plugin: python
+    python-version: python3
+    python-packages: [h2, hpack, hyper, hyperframe, requests, 'git+https://github.com/moaxey/python-zeroconf', pocketsphinx]
+  pyalexa:
+    plugin: dump
+    source: ..
+    organize:
+      alexa.py: bin/alexa.py
+      alexa_audio.py: bin/alexa_audio.py
+      alexa_audio_device.py: bin/alexa_audio_device.py
+      alexa_auth.py: bin/alexa_auth.py
+      alexa_communication.py: bin/alexa_communication.py
+      alexa_control.py: bin/alexa_control.py
+      alexa_device.py: bin/alexa_device.py
+      alexa_http_config.py: bin/alexa_http_config.py
+      alexa_params.py: bin/alexa_params.py
+    stage-packages:
+      - ffmpeg
+    build-packages:
+      - swig
+
