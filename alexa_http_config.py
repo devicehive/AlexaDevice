@@ -8,20 +8,26 @@ from http.server import BaseHTTPRequestHandler
 from cgi import parse_header
 from urllib.parse import parse_qs, urlencode, urlparse
 
-try:
-	with open(alexa_params.ALEXA_CREDENTIALS_FILE, 'r') as infile:
-		config = json.load(infile)
-		clientId = config['Client_ID']
-		clientSecret = config['Client_Secret']
-		threshold = config['threshold']
-		deviceSerial = config['deviceSerial']
-		productId = config['productId']
-except IOError:
-	threshold = alexa_params.DEFAULT_VOICE_THRESHOLD
-	productId = alexa_params.DEFAULT_PRODUCT_ID
-	clientId = alexa_params.DEFAULT_CLIEND_ID
-	deviceSerial = alexa_params.DEFAULT_DEVICE_SERIAL
-	clientSecret = alexa_params.DEFAULT_CLIENT_SECRET
+threshold = alexa_params.DEFAULT_VOICE_THRESHOLD
+productId = alexa_params.DEFAULT_PRODUCT_ID
+clientId = alexa_params.DEFAULT_CLIEND_ID
+deviceSerial = alexa_params.DEFAULT_DEVICE_SERIAL
+clientSecret = alexa_params.DEFAULT_CLIENT_SECRET
+
+def load_config():
+	global clientId, clientSecret, threshold, deviceSerial, productId
+	try:
+		with open(alexa_params.ALEXA_CREDENTIALS_FILE, 'r') as infile:
+			config = json.load(infile)
+			clientId = config['Client_ID']
+			clientSecret = config['Client_Secret']
+			threshold = config['threshold']
+			deviceSerial = config['deviceSerial']
+			productId = config['productId']
+			return config
+	except IOError:
+		pass
+	return None
 
 class AlexaConfig(BaseHTTPRequestHandler):
 	def do_POST(self):

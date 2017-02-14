@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
+import os
 import json
 import alexa_params
 import alexa_device
+import alexa_http_config
 
 alexa = None
 
@@ -10,13 +12,10 @@ def start():
 	global alexa
 	if alexa is not None:
 		return
-	try:
-		with open(alexa_params.ALEXA_CREDENTIALS_FILE, 'r') as infile:
-			alexa_config = json.load(infile)
+	alexa_config = alexa_http_config.load_config()
+	if alexa_config is not None:
 		print("Alexa found config.")
 		alexa = alexa_device.AlexaDevice(alexa_config)
-	except IOError:
-		pass
 
 def close():
 	global alexa
