@@ -16,21 +16,24 @@ def pulse_init():
 	global pa, in_stream, out_stream, error
 	error = ctypes.byref(ctypes.c_int(0))
 	pa = ctypes.cdll.LoadLibrary('libpulse-simple.so.0')
+	pa.strerror.restype = ctypes.c_char_p
 	ss = _struct_pa_sample_spec(_PA_SAMPLE_S16LE, 16000, 1)
 
 	out_stream = ctypes.c_void_p(pa.pa_simple_new(None,
 		'Alexa'.encode('ascii'), _PA_STREAM_PLAYBACK, None,
 		'Alexa voice'.encode('ascii'), ctypes.byref(ss),
 		None, None, error))
-	if out_stream is None:
-		raise Exception('Could not create pulse audio output stream')
+	if not out_stream:
+		raise Exception('Could not create pulse audio output stream: '
+			+ str(pa.strerror(error), 'ascii'))
 
 	in_stream = ctypes.c_void_p(pa.pa_simple_new(None,
 		'Alexa'.encode('ascii'), _PA_STREAM_RECORD, None,
 		'Alexa mic'.encode('ascii'), ctypes.byref(ss),
 		None, None, error))
-	if in_stream is None:
-		raise Exception('Could not create pulse audio input stream')
+	if not in_stream:
+		raise Exception('Could not create pulse audio input stream: '
+			+ str(pa.strerror(error), 'ascii'))
 	print('PulseAudio is initialized.')
 
 def pulse_close():
