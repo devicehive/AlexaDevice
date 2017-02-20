@@ -28,6 +28,7 @@ App can be built as snap package.
 cd snap
 snacraft
 sudo snap install --devmode alexa_1.0_amd64.snap
+sudo snap connect alexa:alsa :alsa
 ```
 
 #3rd party parts in source code

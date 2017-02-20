@@ -42,10 +42,10 @@ parts:
   alsa-lib:
     source: git://git.alsa-project.org/alsa-lib.git
     plugin: autotools
-    configflags: [--with-configdir=/snap/alexa/current/usr/share/alsa, --with-plugindir=/snap/alexa/current/usr/lib/x86_64-linux-gnu/alsa-lib]
+    configflags: [--with-configdir=/snap/alexa/current/usr/share/alsa]
     stage-packages:
+      - libasound2
       - libasound2-data
-      - libasound2-plugins
     build-packages:
       - git
       - g++
