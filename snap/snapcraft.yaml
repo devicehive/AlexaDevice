@@ -33,6 +33,8 @@ parts:
       alexa_params.py: bin/alexa_params.py
     stage-packages:
       - ffmpeg
+      - libpulse0
     build-packages:
       - swig
+      - libpulse-dev
 
