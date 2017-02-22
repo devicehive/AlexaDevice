@@ -14,7 +14,7 @@ _PA_SAMPLE_S16LE = 3
 
 def pulse_init():
 	global pa, in_stream, out_stream, error
-	error = ctypes.byref(ctypes.c_int(0))
+	error = ctypes.c_int(0)
 	pa = ctypes.cdll.LoadLibrary('libpulse-simple.so.0')
 	pa.strerror.restype = ctypes.c_char_p
 	ss = _struct_pa_sample_spec(_PA_SAMPLE_S16LE, 16000, 1)
@@ -22,7 +22,7 @@ def pulse_init():
 	out_stream = ctypes.c_void_p(pa.pa_simple_new(None,
 		'Alexa'.encode('ascii'), _PA_STREAM_PLAYBACK, None,
 		'Alexa voice'.encode('ascii'), ctypes.byref(ss),
-		None, None, error))
+		None, None, ctypes.byref(error)))
 	if not out_stream:
 		raise Exception('Could not create pulse audio output stream: '
 			+ str(pa.strerror(error), 'ascii'))
@@ -30,7 +30,7 @@ def pulse_init():
 	in_stream = ctypes.c_void_p(pa.pa_simple_new(None,
 		'Alexa'.encode('ascii'), _PA_STREAM_RECORD, None,
 		'Alexa mic'.encode('ascii'), ctypes.byref(ss),
-		None, None, error))
+		None, None, ctypes.byref(error)))
 	if not in_stream:
 		raise Exception('Could not create pulse audio input stream: '
 			+ str(pa.strerror(error), 'ascii'))
@@ -50,10 +50,10 @@ class AlexaAudioDevice:
 		pa.pa_simple_flush(out_stream)
 
 	def write(self, b):
-		return pa.pa_simple_write(out_stream,	b, len(b), error)
+		return pa.pa_simple_write(out_stream,	b, len(b), ctypes.byref(error))
 
 	def read(self, n):
 		data = ctypes.create_string_buffer(n)
-		pa.pa_simple_read(in_stream, data, n, error)
+		pa.pa_simple_read(in_stream, data, n, ctypes.byref(error))
 		return data.raw
 
