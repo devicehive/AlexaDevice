@@ -2,7 +2,7 @@ name: alexa
 version: "1.0"
 summary: Amazon Alexa snap
 description: Add Amazon Alexa to your device
-confinement: devmode
+confinement: strict
 
 apps:
   alexa:
