@@ -52,6 +52,9 @@ class AlexaAudioDevice:
 	def write(self, b):
 		return pa.pa_simple_write(out_stream,	b, len(b), ctypes.byref(error))
 
+	def flush(self):
+		pa.pa_simple_flush(out_stream)
+
 	def read(self, n):
 		data = ctypes.create_string_buffer(n)
 		pa.pa_simple_read(in_stream, data, n, ctypes.byref(error))
