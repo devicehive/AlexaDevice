@@ -26,7 +26,7 @@ _Note Voice detection threshold is float value for adjusting voice detection. Th
 App can be built as snap package.
 Install `pulseaudio` snap before installing this:
 ```bash
-sudo snap install pulseaudio
+sudo snap install --devmode pulseaudio
 ```
 Now build and install:
 ```bash
