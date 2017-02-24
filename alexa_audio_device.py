@@ -24,3 +24,7 @@ class AlexaAudioDevice:
 
 	def read(self, n):
 		return self.in_stream.read(n)
+
+	def flush(self):
+		pass
+

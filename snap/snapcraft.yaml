@@ -2,7 +2,7 @@ name: alexa
 version: "1.0"
 summary: Amazon Alexa snap
 description: Add Amazon Alexa to your device
-confinement: devmode
+confinement: strict
 
 apps:
   alexa:
@@ -33,12 +33,14 @@ parts:
       alexa_params.py: bin/alexa_params.py
     stage-packages:
       - ffmpeg
+      - libpulse0
       - pavucontrol
       - pulseaudio
       - libportaudio2
     build-packages:
       - swig
       - portaudio19-dev
+      - libpulse-dev
   alsa-lib:
     source: git://git.alsa-project.org/alsa-lib.git
     plugin: autotools

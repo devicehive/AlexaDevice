@@ -17,6 +17,7 @@ class AlexaAudio:
 		self.ad = alexa_audio_device.AlexaAudioDevice()
 		self.callback = callback
 		self.beep_buf = self._beep()
+		self.beep_short_buf = self._beep(150, 3000.0, 16000, 0.2)
 		self.is_run = True
 		self.average = 100.0
 		self.skip = 0
@@ -46,9 +47,14 @@ class AlexaAudio:
 
 	def beep(self):
 		self.play(self.beep_buf)
+		self.ad.flush()
+
+	def beep_short(self):
+		self.play(self.beep_short_buf)
+		self.ad.flush()
 
 	def start_capture(self, notify = True):
-		self.beep()
+		self.beep_short()
 		self.capture_in_progress = True
 		self.detectBuffer = bytes()
 		self.notify = notify
@@ -67,14 +73,14 @@ class AlexaAudio:
 			for i in range(0, len(buf), 2):
 				val = struct.unpack_from('<h', buf, i)[0] # 16 bit little endian
 				level += abs(val)
-			level = level / len(buf) / 2
+			level = level / (len(buf) / 2)
 
 			if self.capture_in_progress:
 				self.detectBuffer += buf
 				duration = len(self.detectBuffer)/16000/2
 				if duration >= DETECT_MAX_LENGTH_S or (
 					duration >= DETECT_MIN_LENGTH_S and 
-					level * DETECT_HYSTERESIS < self.average):
+					level < self.average * DETECT_HYSTERESIS):
 					self.capture_in_progress = False
 					print("Finished " + str(level) + "/" + str(self.average) + " "
 						+ str(duration) + "s")
@@ -107,8 +113,15 @@ class AlexaAudio:
 				if(self.buffer is not None):
 					break
 				time.sleep(1)
+			if self.buffer is None:
+				res = self.detectBuffer
+				self.capture_in_progress = False
+				print('Timeout exceed, phrase might not be complete')
+				self.beep()
+				return res
 		res = self.buffer
 		self.buffer = None
+		self.beep()
 		return res
 
 	def play(self, audio):
