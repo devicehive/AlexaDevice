@@ -4,7 +4,13 @@ import calendar
 import json
 import requests
 import threading
-from hyper import HTTP20Connection
+import hyper
+import h2
+import inspect
+
+def lineno():
+    """Returns the current line number in our program."""
+    return str(inspect.currentframe().f_back.f_lineno)
 
 __author__ = "NJC"
 __license__ = "MIT"
@@ -185,7 +191,7 @@ class AlexaConnection:
 
         """
         # Open connection
-        self.connection = HTTP20Connection(self.url, port=443, secure=True, force_proto="h2", enable_push=True)
+        self.connection = hyper.HTTP20Connection(self.url, port=443, secure=True, force_proto="h2", enable_push=True)
 
         # First start downstream
         self.start_downstream()
@@ -196,7 +202,7 @@ class AlexaConnection:
         # Manually handle this response for now
         data = self.get_response(stream_id)
         # Should be 204 response (no content)
-        if data.status != 204:
+        if data is None or data.status != 204:
             print("PUSH" + str(data.read()))
             raise NameError("Bad status (%s)" % data.status)
 
@@ -211,17 +217,21 @@ class AlexaConnection:
         :param lock: boolean indicating if locking should be used
         """
         if lock:
+            print("["+lineno()+"] lock")
             self.lock.acquire()
         # Start by sending a "GET" /directives to open downchannel stream
         self.downstream_id = self.send_request('GET', '/directives')
         downstream_response = self.get_response(self.downstream_id)
-        if downstream_response.status != 200:
-            print(str(downstream_response.read()))
-            raise NameError("Bad status (%s)" % downstream_response.status)
+        if downstream_response is None or downstream_response.status != 200:
+            if downstream_response is not None:
+                print(str(downstream_response.read()))
+                raise NameError("Bad status (%s)" % downstream_response.status)
+            else:
+                raise NameError("Bad status (None)")
         self.downstream_boundary = get_boundary_from_response(downstream_response)
         if lock:
+            print("["+lineno()+"] unlock")
             self.lock.release()
-
         downstream_thread = threading.Thread(target=self.downstream_thread)
         downstream_thread.start()
 
@@ -260,21 +270,18 @@ class AlexaConnection:
             # If anything goes wrong, reset the connection
             except:
                 print("Ping not successful.")
-                self.lock.acquire()
-                self.connection.close()
-                self.lock.release()
+                self.close()
                 # Reinitialize the connection
                 self.init_connection()
                 break
             # If ping failed and did not result in correct response
-            if data.status != 204:
+            if data is None or data.status != 204:
                 # Print data for debugging
-                print(data.read())
+                if data is not None:
+                    print(data.read())
                 print("Ping not successful.")
                 # Close connection
-                self.lock.acquire()
-                self.connection.close()
-                self.lock.release()
+                self.close()
                 # Reinitialize the connection
                 self.init_connection()
                 break
@@ -290,8 +297,10 @@ class AlexaConnection:
         """ Closes the connection and stops the ping thread.
         """
         self.thread_stop_event.set()
+        print("["+lineno()+"] lock")
         self.lock.acquire()
         self.connection.close()
+        print("["+lineno()+"] unlock")
         self.lock.release()
 
     def get_unique_message_id(self):
@@ -357,6 +366,17 @@ class AlexaConnection:
             token = self.latest_token
         return token
 
+    def send_request_worker(self, method, path, headers, body, result):
+        try:
+            if body is not None:
+                result[path] = self.connection.request(method, path, headers=headers, body=body)
+            else:
+                result[path] = self.connection.request(method, path, headers=headers)
+        except hyper.http20.exceptions.ConnectionError:
+            pass
+        except h2.exceptions.StreamClosedError:
+            pass
+
     def send_request(self, method, path, body=None, path_version=True):
         """ Makes sending a request easy for the end-user. Most of the deails are hidden away inside of this function.
             All that is required is the method (e.g. 'GET') and the path. Optional arguments include the body and
@@ -380,14 +400,21 @@ class AlexaConnection:
             path = '/v20160207' + path
 
         # Send actual request
+        print("["+lineno()+"] lock")
         self.lock.acquire()
-        if body is not None:
-            stream_id = self.connection.request(method, path, headers=headers, body=body)
-        else:
-            stream_id = self.connection.request(method, path, headers=headers)
+        result = dict()
+        result[path] = None
+        p = threading.Thread(target=self.send_request_worker, args=(method, path, headers, body, result))
+        p.start()
+        p.join(5)
+        print("["+lineno()+"] unlock")
         self.lock.release()
+        if p.is_alive():
+            print("send_request() timeout reach... abort")
+            self.close()
+            self.init_connection()
 
-        return stream_id
+        return result[path]
 
     def send_event(self, header, payload=None, audio=None):
         """ Send an event allows for a higher level of abstraction compared to send_request. The AVS message header
@@ -428,6 +455,14 @@ class AlexaConnection:
         # Send request and return stream_id
         return self.send_request('POST', '/events', body=body_string)
 
+    def get_response_worker(self, stream_id, result):
+        try:
+            result[stream_id] = self.connection.get_response(stream_id)
+        except hyper.http20.exceptions.StreamResetError:
+            pass
+        except hyper.http20.exceptions.ConnectionError:
+            pass
+
     def get_response(self, stream_id):
         """ Get a response from the HTTP/2 connection. Current version of hyper requires locking if threads are used.
             Otherwise, this function would not be needed.
@@ -435,10 +470,22 @@ class AlexaConnection:
         :param stream_id: stream_id used to get the response
         :return: the resulting response object (hyper.HTTP20Response)
         """
+        if stream_id is None:
+            return None
+        print("["+lineno()+"] lock")
         self.lock.acquire()
-        result = self.connection.get_response(stream_id)
+        result = dict()
+        result[stream_id] = None
+        p = threading.Thread(target=self.get_response_worker, args=(stream_id, result))
+        p.start()
+        p.join(5)
+        print("["+lineno()+"] unlock")
         self.lock.release()
-        return result
+        if p.is_alive():
+            print("get_response() timeout reach... abort")
+            self.close()
+            self.init_connection()
+        return result[stream_id]
 
     def start_recognize_event(self, raw_audio, dialog_request_id=None):
         """ Starts a SpeechRecognizer.Recognize event. Requires a raw_audio argument. The optional dialog_request_id
@@ -478,7 +525,7 @@ class AlexaConnection:
         response = self.get_response(stream_id)
 
         # If no content response, but things are OK, just return
-        if response.status == 204:
+        if response is None or response.status == 204:
             return
 
         # If not OK response status, throw error

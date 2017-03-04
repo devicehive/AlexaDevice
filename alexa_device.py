@@ -194,7 +194,7 @@ class AlexaDevice:
 
     def user_initiate_audio(self):
         raw_audio = self.alexa_audio_instance.get_audio()
-        if raw_audio is None:
+        if raw_audio is None or self.alexa is None:
             return
 
         # TODO make it so the response can be interrupted by user if desired (maybe start a thread)
