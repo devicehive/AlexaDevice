@@ -376,6 +376,8 @@ class AlexaConnection:
             pass
         except h2.exceptions.StreamClosedError:
             pass
+        except BrokenPipeError:
+            pass
 
     def send_request(self, method, path, body=None, path_version=True):
         """ Makes sending a request easy for the end-user. Most of the deails are hidden away inside of this function.
@@ -409,8 +411,8 @@ class AlexaConnection:
         p.join(5)
         print("["+lineno()+"] unlock")
         self.lock.release()
-        if p.is_alive():
-            print("send_request() timeout reach... abort")
+        if p.is_alive() or result[path] is None:
+            print("send_request() failed... reconnect")
             self.close()
             self.init_connection()
 
@@ -481,8 +483,8 @@ class AlexaConnection:
         p.join(5)
         print("["+lineno()+"] unlock")
         self.lock.release()
-        if p.is_alive():
-            print("get_response() timeout reach... abort")
+        if p.is_alive() or result[stream_id] is None:
+            print("get_response() failed... reconnect")
             self.close()
             self.init_connection()
         return result[stream_id]
