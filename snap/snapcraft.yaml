@@ -8,16 +8,16 @@ apps:
   alexa:
     command: bin/alexa.py
     daemon: simple
-    plugs: [network, network-bind, pulseaudio]
+    plugs: [network, network-bind, alsa, pulseaudio]
   alexa-run:
     command: bin/alexa.py
-    plugs: [network, network-bind, pulseaudio]
+    plugs: [network, network-bind, alsa, pulseaudio]
 
 parts:
   python-hyper:
     plugin: python
     python-version: python3
-    python-packages: [h2, hpack, hyper, hyperframe, requests, 'git+https://github.com/moaxey/python-zeroconf', pocketsphinx]
+    python-packages: [h2, hpack, hyper, hyperframe, requests, 'git+https://github.com/moaxey/python-zeroconf', pocketsphinx, pyaudio]
   pyalexa:
     plugin: dump
     source: ..
@@ -34,7 +34,26 @@ parts:
     stage-packages:
       - ffmpeg
       - libpulse0
+      - pavucontrol
+      - pulseaudio
+      - libportaudio2
     build-packages:
       - swig
+      - portaudio19-dev
       - libpulse-dev
+  alsa-lib:
+    source: git://git.alsa-project.org/alsa-lib.git
+    plugin: autotools
+    configflags: [--with-configdir=/snap/alexa/current/usr/share/alsa]
+    stage-packages:
+      - libasound2
+      - libasound2-data
+    build-packages:
+      - git
+      - g++
+      - make
+      - autoconf
+      - libtool
+      - automake
+      - build-essential
 

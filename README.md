@@ -8,7 +8,7 @@ _Note this step can be skipped if you already have device profile credentials._
 * Install dependencies
 ```bash
 sudo apt install ffmpeg swig libpulse-dev
-sudo pip3 install h2 hpack hyper hyperframe requests 'git+https://github.com/moaxey/python-zeroconf' pocketsphinx
+sudo pip3 install h2 hpack hyper hyperframe requests 'git+https://github.com/moaxey/python-zeroconf' pocketsphinx pyaudio
 ```
 * Make sure your system has PulseAudio support.
 * Run
@@ -33,6 +33,7 @@ Now build and install:
 cd snap
 snacraft
 sudo snap install --devmode alexa_1.0_amd64.snap
+sudo snap connect alexa:alsa :alsa
 ```
 
 #3rd party parts in source code
