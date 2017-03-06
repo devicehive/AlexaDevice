@@ -6,11 +6,7 @@ import requests
 import threading
 import hyper
 import h2
-import inspect
 
-def lineno():
-    """Returns the current line number in our program."""
-    return str(inspect.currentframe().f_back.f_lineno)
 
 __author__ = "NJC"
 __license__ = "MIT"
@@ -217,7 +213,6 @@ class AlexaConnection:
         :param lock: boolean indicating if locking should be used
         """
         if lock:
-            print("["+lineno()+"] lock")
             self.lock.acquire()
         # Start by sending a "GET" /directives to open downchannel stream
         self.downstream_id = self.send_request('GET', '/directives')
@@ -230,7 +225,6 @@ class AlexaConnection:
                 raise NameError("Bad status (None)")
         self.downstream_boundary = get_boundary_from_response(downstream_response)
         if lock:
-            print("["+lineno()+"] unlock")
             self.lock.release()
         downstream_thread = threading.Thread(target=self.downstream_thread)
         downstream_thread.start()
@@ -297,10 +291,8 @@ class AlexaConnection:
         """ Closes the connection and stops the ping thread.
         """
         self.thread_stop_event.set()
-        print("["+lineno()+"] lock")
         self.lock.acquire()
         self.connection.close()
-        print("["+lineno()+"] unlock")
         self.lock.release()
 
     def get_unique_message_id(self):
@@ -402,14 +394,12 @@ class AlexaConnection:
             path = '/v20160207' + path
 
         # Send actual request
-        print("["+lineno()+"] lock")
         self.lock.acquire()
         result = dict()
         result[path] = None
         p = threading.Thread(target=self.send_request_worker, args=(method, path, headers, body, result))
         p.start()
         p.join(5)
-        print("["+lineno()+"] unlock")
         self.lock.release()
         if p.is_alive() or result[path] is None:
             print("send_request() failed... reconnect")
@@ -474,14 +464,12 @@ class AlexaConnection:
         """
         if stream_id is None:
             return None
-        print("["+lineno()+"] lock")
         self.lock.acquire()
         result = dict()
         result[stream_id] = None
         p = threading.Thread(target=self.get_response_worker, args=(stream_id, result))
         p.start()
         p.join(5)
-        print("["+lineno()+"] unlock")
         self.lock.release()
         if p.is_alive() or result[stream_id] is None:
             print("get_response() failed... reconnect")
