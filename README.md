@@ -7,9 +7,10 @@ Add `http://alexa.local:3000/authresponse` to `Allowed Return URLs` and `http://
 _Note this step can be skipped if you already have device profile credentials._
 * Install dependencies
 ```bash
-sudo apt install ffmpeg swig libpulse-dev
+sudo apt install ffmpeg swig libportaudio2 libpulse-dev
 sudo pip3 install h2 hpack hyper hyperframe requests 'git+https://github.com/moaxey/python-zeroconf' pocketsphinx pyaudio
 ```
+_Note 'libpulse-dev' should be installed only for PulseAudio based devices. 'pyaduio' and 'libportaudio2' should be installed on other devices, for example alsa capable_
 * Make sure your system has PulseAudio support.
 * Run
 ```bash
@@ -35,6 +36,7 @@ snacraft
 sudo snap install --devmode alexa_1.0_amd64.snap
 sudo snap connect alexa:alsa :alsa
 ```
+_Note last line should be ran only for alsa based devices_
 
 #3rd party parts in source code
 Modified Python Alexa Voice Service - https://github.com/nicholasjconn/python-alexa-voice-service  
