@@ -99,6 +99,7 @@ class AlexaAudio:
 						#self.play(self.detect_buffer)
 					else:
 						print("Cancel " + str(duration) + "s due to the low level ")
+						#self.beep_failed()
 			else:
 				self.decoder.process_raw(buf, False, False)
 				if self.decoder.hyp() != None:
@@ -108,7 +109,7 @@ class AlexaAudio:
 					self.decoder.end_utt()
 					self.decoder.start_utt()
 				else:
-					self.average = (self.average + level) / 2
+					self.average = self.average * 0.75 + level * 0.25
 		print("Audio Processing finished.")
 
 	def close(self):
@@ -136,7 +137,8 @@ class AlexaAudio:
 					return None
 		res = self.buffer
 		self.buffer = None
-		self.beep_finished()
+		if res is not None:
+			self.beep_finished()
 		return res
 
 	def play(self, audio):
