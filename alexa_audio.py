@@ -16,8 +16,9 @@ class AlexaAudio:
 	def __init__(self, threshold, callback):
 		self.ad = alexa_audio_device.AlexaAudioDevice()
 		self.callback = callback
-		self.beep_buf = self._beep()
-		self.beep_short_buf = self._beep(150, 3000.0, 16000, 0.2)
+		self.beep_finished_buf = self._beep(150, 1000)
+		self.beep_short_buf = self._beep(150, 3000)
+		self.beep_failed_buf = self._beep(600, 400)
 		self.is_run = True
 		self.average = 100.0
 		self.skip = 0
@@ -45,12 +46,16 @@ class AlexaAudio:
 			snd += struct.pack('<h', int(val))
 		return snd
 
-	def beep(self):
-		self.play(self.beep_buf)
+	def beep_finished(self):
+		self.play(self.beep_finished_buf)
 		self.ad.flush()
 
 	def beep_short(self):
 		self.play(self.beep_short_buf)
+		self.ad.flush()
+
+	def beep_failed(self):
+		self.play(self.beep_failed_buf)
 		self.ad.flush()
 
 	def start_capture(self, notify = True):
@@ -117,11 +122,11 @@ class AlexaAudio:
 				res = self.detectBuffer
 				self.capture_in_progress = False
 				print('Timeout exceed, phrase might not be complete')
-				self.beep()
+				self.beep_finished()
 				return res
 		res = self.buffer
 		self.buffer = None
-		self.beep()
+		self.beep_finished()
 		return res
 
 	def play(self, audio):
