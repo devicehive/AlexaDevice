@@ -140,7 +140,3 @@ class AlexaAudio:
 		pcm = p.communicate(input=raw_audio)[0]
 		self.play(pcm)
 
-	def play_wav(self, file, timeout=None, stop_event=None, repeat=False):
-		# TODO
-		print("play_wav " + file)
-

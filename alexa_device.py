@@ -31,8 +31,34 @@ class AlexaDevice:
 			self.access_token_time = current_time
 		return self.access_token
 
+	def check_response(self, content):
+		jsontypepos = content.find(b'application/json')
+		if jsontypepos < 0:
+			return False
+		jsonpos = content.find(b'\r\n\r\n', jsontypepos) + 4
+		if jsonpos < 4:
+			return False
+		jsonposend = content.find(b'\r\n--', jsonpos)
+		if jsonposend < 0:
+			return False
+		jsontext = content[jsonpos:jsonposend].decode('utf8')
+		response_metadata = json.loads(jsontext)
+		if 'messageBody' not in response_metadata:
+			return False
+		if 'directives' not in response_metadata['messageBody']:
+			return False
+
+		for v in response_metadata['messageBody']['directives']:
+			if 'name' in v:
+				if v['name'] == 'listen':
+					return True
+		return False
+
 	def send_audio(self):
-		raw_audio = self.alexa_audio_instance.get_audio()
+		self.get_audio_and_send();
+
+	def get_audio_and_send(self, timeout = None):
+		raw_audio = self.alexa_audio_instance.get_audio(timeout)
 		if raw_audio is None:
 			return
 		headers = {'Authorization': 'Bearer ' + self.get_access_token()}
@@ -68,6 +94,10 @@ class AlexaDevice:
 		data = content[rawmpegpos + 4:]
 		print("Alexa got response")
 		self.alexa_audio_instance.play_mp3(data)
+		if self.check_response(content):
+			time.sleep(0.5)
+			self.get_audio_and_send(5)
 
 	def close(self):
 		self.alexa_audio_instance.close()
+
