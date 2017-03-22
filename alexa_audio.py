@@ -61,7 +61,8 @@ class AlexaAudio:
 	def start_capture(self, notify = True):
 		self.beep_short()
 		self.capture_in_progress = True
-		self.detectBuffer = bytes()
+		self.detect_buffer = bytes()
+		self.detect_buffer_max = 0
 		self.notify = notify
 
 	def processAudio(self):
@@ -81,24 +82,28 @@ class AlexaAudio:
 			level = level / (len(buf) / 2)
 
 			if self.capture_in_progress:
-				self.detectBuffer += buf
-				duration = len(self.detectBuffer)/16000/2
+				self.detect_buffer += buf
+				if level > self.detect_buffer_max:
+					self.detect_buffer_max = level
+				duration = len(self.detect_buffer)/16000/2
 				if duration >= DETECT_MAX_LENGTH_S or (
 					duration >= DETECT_MIN_LENGTH_S and 
 					level < self.average * DETECT_HYSTERESIS):
 					self.capture_in_progress = False
-					print("Finished " + str(level) + "/" + str(self.average) + " "
-						+ str(duration) + "s")
-					self.buffer = self.detectBuffer
-					if self.notify:
-						threading.Thread(target=self.callback).start()
-						self.skip += 16000
-					#self.play(self.detectBuffer)
+					if self.detect_buffer_max > self.average * DETECT_HYSTERESIS:
+						print("Finished " + str(duration) + "s")
+						self.buffer = self.detect_buffer
+						if self.notify:
+							threading.Thread(target=self.callback).start()
+							self.skip += 16000
+						#self.play(self.detect_buffer)
+					else:
+						print("Cancel " + str(duration) + "s due to the low level ")
 			else:
 				self.decoder.process_raw(buf, False, False)
 				if self.decoder.hyp() != None:
 					self.start_capture()
-					self.detectBuffer += buf
+					self.detect_buffer += buf
 					print("Found Alexa keyword")
 					self.decoder.end_utt()
 					self.decoder.start_utt()
@@ -119,11 +124,16 @@ class AlexaAudio:
 					break
 				time.sleep(1)
 			if self.buffer is None:
-				res = self.detectBuffer
-				self.capture_in_progress = False
-				print('Timeout exceed, phrase might not be complete')
-				self.beep_finished()
-				return res
+				if self.detect_buffer_max > self.average * DETECT_HYSTERESIS:
+					res = self.detect_buffer
+					self.capture_in_progress = False
+					print('Timeout exceed, phrase might not be completed')
+					self.beep_finished()
+					return res
+				else:
+					print('Timeout exceed, but nothing was detected')
+					self.beep_failed()
+					return None
 		res = self.buffer
 		self.buffer = None
 		self.beep_finished()
