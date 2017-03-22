@@ -7,7 +7,7 @@ def main():
 	alexa_audio_device.init()
 	alexa_auth.start()
 	try:
-		input("Alexa started. Press Enter to exit...\n")
+		input("Press Enter to exit...\n")
 	except KeyboardInterrupt:
 		pass
 	alexa_auth.close()

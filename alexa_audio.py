@@ -11,6 +11,7 @@ from pocketsphinx import *
 DETECT_HYSTERESIS = 1.2 # level should fall lower that background noise
 DETECT_MIN_LENGTH_S = 2.5 # minimal length of record
 DETECT_MAX_LENGTH_S = 10 # minimal amount of buffers to activate
+DETECT_BUFFERS_FOR_INIT = 10 # number of buffers for initialising
 
 class AlexaAudio:
 	def __init__(self, threshold, callback):
@@ -21,6 +22,7 @@ class AlexaAudio:
 		self.beep_failed_buf = self._beep(600, 400)
 		self.is_run = True
 		self.average = 100.0
+		self.init_counter = 0
 		self.skip = 0
 		# init pocketsphinx
 		config = Decoder.default_config()
@@ -102,13 +104,17 @@ class AlexaAudio:
 						#self.beep_failed()
 			else:
 				self.decoder.process_raw(buf, False, False)
-				if self.decoder.hyp() != None:
+				if self.decoder.hyp() != None and self.init_counter > DETECT_BUFFERS_FOR_INIT:
 					self.start_capture()
 					self.detect_buffer += buf
 					print("Found Alexa keyword")
 					self.decoder.end_utt()
 					self.decoder.start_utt()
 				else:
+					if self.init_counter <= DETECT_BUFFERS_FOR_INIT:
+						if self.init_counter == DETECT_BUFFERS_FOR_INIT:
+							print("Alexa is initialized and started.")
+						self.init_counter += 1
 					self.average = self.average * 0.75 + level * 0.25
 		print("Audio Processing finished.")
 
