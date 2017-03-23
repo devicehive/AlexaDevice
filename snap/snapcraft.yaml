@@ -1,5 +1,5 @@
 name: alexa
-version: "1.0"
+version: "1.1"
 summary: Amazon Alexa snap
 description: Add Amazon Alexa to your device
 confinement: strict
@@ -17,7 +17,7 @@ parts:
   python-hyper:
     plugin: python
     python-version: python3
-    python-packages: [h2, hpack, hyper, hyperframe, requests, 'git+https://github.com/moaxey/python-zeroconf', pocketsphinx, pyaudio]
+    python-packages: [requests, 'git+https://github.com/moaxey/python-zeroconf', pocketsphinx]
   pyalexa:
     plugin: dump
     source: ..
@@ -25,8 +25,8 @@ parts:
       alexa.py: bin/alexa.py
       alexa_audio.py: bin/alexa_audio.py
       alexa_audio_device.py: bin/alexa_audio_device.py
+      alexa_audio_device_pulse.py: bin/alexa_audio_device_pulse.py
       alexa_auth.py: bin/alexa_auth.py
-      alexa_communication.py: bin/alexa_communication.py
       alexa_control.py: bin/alexa_control.py
       alexa_device.py: bin/alexa_device.py
       alexa_http_config.py: bin/alexa_http_config.py
@@ -36,24 +36,7 @@ parts:
       - libpulse0
       - pavucontrol
       - pulseaudio
-      - libportaudio2
     build-packages:
       - swig
-      - portaudio19-dev
       - libpulse-dev
-  alsa-lib:
-    source: git://git.alsa-project.org/alsa-lib.git
-    plugin: autotools
-    configflags: [--with-configdir=/snap/alexa/current/usr/share/alsa]
-    stage-packages:
-      - libasound2
-      - libasound2-data
-    build-packages:
-      - git
-      - g++
-      - make
-      - autoconf
-      - libtool
-      - automake
-      - build-essential
 
