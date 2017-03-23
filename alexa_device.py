@@ -75,7 +75,13 @@ class AlexaDevice:
 				('audio', (None, raw_audio, 'audio/L16; rate=16000; channels=1'))
 			]
 		url = 'https://access-alexa-na.amazon.com/v1/avs/speechrecognizer/recognize'
-		r = requests.post(url, headers=headers, files=files)
+		try:
+			r = requests.post(url, headers=headers, files=files)
+		except requests.exceptions.ConnectionError as e:
+			print(type(e).__name__)
+			time.sleep(0.1)
+			self.alexa_audio_instance.beep_failed()
+			return
 		if r.status_code != requests.codes.ok:
 			print("Audio response faile with " + str(r.status_code) + " code: " + r.text)
 			self.alexa_audio_instance.beep_failed()
