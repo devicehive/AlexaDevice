@@ -8,10 +8,10 @@ apps:
   alexa:
     command: bin/alexa.py
     daemon: simple
-    plugs: [network, network-bind, alsa, pulseaudio]
+    plugs: [network, network-bind, pulseaudio]
   alexa-run:
     command: bin/alexa.py
-    plugs: [network, network-bind, alsa, pulseaudio]
+    plugs: [network, network-bind, pulseaudio]
 
 parts:
   python-hyper:
@@ -34,9 +34,9 @@ parts:
     stage-packages:
       - ffmpeg
       - libpulse0
-      - pavucontrol
       - pulseaudio
     build-packages:
       - swig
+      - git
       - libpulse-dev
 

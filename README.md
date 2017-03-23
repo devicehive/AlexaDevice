@@ -10,7 +10,7 @@ _Note this step can be skipped if you already have device profile credentials._
 sudo apt install python3-pip git ffmpeg swig libportaudio2 portaudio19-dev libpulse-dev
 sudo pip3 install requests 'git+https://github.com/moaxey/python-zeroconf' pocketsphinx pyaudio
 ```
-_Note 'libpulse-dev' should be installed only for PulseAudio based devices. 'pyaduio', 'libportaudio2' and 'portaudio19-dev' should be installed on other devices, for example alsa capable_
+_Note 'libpulse-dev' should be installed only for PulseAudio based devices. 'pyaduio', 'libportaudio2' and 'portaudio19-dev' should be installed on other devices, for example alsa capable._
 * Make sure your system has PulseAudio support.
 * Run
 ```bash
@@ -34,9 +34,8 @@ Now build and install:
 cd snap
 snacraft
 sudo snap install --devmode alexa_1.0_amd64.snap
-sudo snap connect alexa:alsa :alsa
 ```
-_Note last line should be ran only for alsa based devices_
+_Note if you modified snap to used for alsa based devices, then additionally call this line `sudo snap connect alexa:alsa :alsa`._
 
 # Similar open source software
 Python Alexa Voice Service - https://github.com/nicholasjconn/python-alexa-voice-service  
