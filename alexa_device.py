@@ -4,6 +4,7 @@ import requests
 import threading
 import json
 import time
+import logging
 
 import alexa_audio
 
@@ -78,27 +79,27 @@ class AlexaDevice:
 		try:
 			r = requests.post(url, headers=headers, files=files)
 		except requests.exceptions.ConnectionError as e:
-			print(type(e).__name__)
+			logging.info(type(e).__name__)
 			time.sleep(0.1)
 			self.alexa_audio_instance.beep_failed()
 			return
 		if r.status_code != requests.codes.ok:
-			print("Audio response faile with " + str(r.status_code) + " code: " + r.text)
+			logging.info("Audio response faile with " + str(r.status_code) + " code: " + r.text)
 			self.alexa_audio_instance.beep_failed()
 			return
 		content = r.content
 		mpegpos = content.find(b'audio/mpeg')
 		if mpegpos < 0:
-			print("No audio found in response: " + r.text)
+			logging.info("No audio found in response: " + r.text)
 			self.alexa_audio_instance.beep_failed()
 			return
 		rawmpegpos = content.find(b'\r\n\r\n', mpegpos);
 		if rawmpegpos < 0:
-			print("No raw audio data found: " + r.text)
+			logging.info("No raw audio data found: " + r.text)
 			self.alexa_audio_instance.beep_failed()
 			return
 		data = content[rawmpegpos + 4:]
-		print("Alexa got response")
+		logging.info("Alexa got response")
 		self.alexa_audio_instance.play_mp3(data)
 		if self.check_response(content):
 			time.sleep(0.5)

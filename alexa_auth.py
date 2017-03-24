@@ -4,6 +4,7 @@ import alexa_control
 import alexa_http_config
 import socket
 import threading
+import logging
 from zeroconf import raw_input, ServiceInfo, Zeroconf
 from http.server import HTTPServer
 
@@ -21,7 +22,7 @@ def get_local_address():
 def start():
 	global localHTTP, zeroconf, info, httpthread
 	ip = get_local_address()
-	print("Local IP is " + ip)
+	logging.info("Local IP is " + ip)
 
 	desc = {'version': '0.1'}
 	info = ServiceInfo("_http._tcp.local.",
@@ -30,11 +31,11 @@ def start():
 			desc, alexa_params.LOCAL_HOST + ".")
 	zeroconf = Zeroconf()
 	zeroconf.registerService(info)
-	print("Local mDNS is started, domain is " + alexa_params.LOCAL_HOST)
+	logging.info("Local mDNS is started, domain is " + alexa_params.LOCAL_HOST)
 	localHTTP = HTTPServer(("", alexa_params.LOCAL_PORT), alexa_http_config.AlexaConfig)
 	httpthread = threading.Thread(target=localHTTP.serve_forever)
 	httpthread.start()
-	print("Local HTTP is " + alexa_params.BASE_URL)
+	logging.info("Local HTTP is " + alexa_params.BASE_URL)
 	alexa_control.start()
 
 def close():

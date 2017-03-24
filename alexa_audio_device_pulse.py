@@ -3,6 +3,7 @@
 import math
 import struct
 import ctypes
+import logging
 
 class _struct_pa_sample_spec(ctypes.Structure):
 	_fields_ = [('format', ctypes.c_int),
@@ -34,7 +35,7 @@ def init():
 	if not in_stream:
 		raise Exception('Could not create pulse audio input stream: '
 			+ str(pa.strerror(error), 'ascii'))
-	print('PulseAudio is initialized.')
+	logging.info('PulseAudio is initialized.')
 
 def deinit():
 	pa.pa_simple_free(in_stream)

@@ -5,6 +5,7 @@ import math
 import struct
 import time
 import alexa_audio_device
+import logging
 from subprocess import Popen, PIPE, STDOUT
 from pocketsphinx import *
 
@@ -30,7 +31,7 @@ class AlexaAudio:
 		config.set_string('-dict', os.path.join(get_model_path(), 'cmudict-en-us.dict'))
 		config.set_string('-logfn', '/dev/null')
 		config.set_string('-keyphrase', 'alexa')
-		print("Voice threshold is " + str(threshold))
+		logging.info("Voice threshold is " + str(threshold))
 		config.set_float('-kws_threshold', threshold)
 		self.decoder = Decoder(config)
 		self.decoder.start_utt()
@@ -68,11 +69,11 @@ class AlexaAudio:
 		self.notify = notify
 
 	def processAudio(self):
-		print("Audio Processing started.")
+		logging.info("Audio Processing started.")
 		while self.is_run:
 			buf = self.ad.read(16000)
 			if buf is None:
-				print("Alexa audio processing exit")
+				logging.info("Alexa audio processing exit")
 				break
 			if self.skip > 0:
 				self.skip -= len(buf)
@@ -93,30 +94,30 @@ class AlexaAudio:
 					level < self.average * DETECT_HYSTERESIS):
 					self.capture_in_progress = False
 					if self.detect_buffer_max > self.average * DETECT_HYSTERESIS:
-						print("Finished " + str(duration) + "s")
+						logging.info("Finished " + str(duration) + "s")
 						self.buffer = self.detect_buffer
 						if self.notify:
 							threading.Thread(target=self.callback).start()
 							self.skip += 16000
 						#self.play(self.detect_buffer)
 					else:
-						print("Cancel " + str(duration) + "s due to the low level ")
+						logging.info("Cancel " + str(duration) + "s due to the low level ")
 						#self.beep_failed()
 			else:
 				self.decoder.process_raw(buf, False, False)
 				if self.decoder.hyp() != None and self.init_counter > DETECT_BUFFERS_FOR_INIT:
 					self.start_capture()
 					self.detect_buffer += buf
-					print("Found Alexa keyword")
+					logging.info("Found Alexa keyword")
 					self.decoder.end_utt()
 					self.decoder.start_utt()
 				else:
 					if self.init_counter <= DETECT_BUFFERS_FOR_INIT:
 						if self.init_counter == DETECT_BUFFERS_FOR_INIT:
-							print("Alexa is initialized and started.")
+							logging.info("Alexa is initialized and started.")
 						self.init_counter += 1
 					self.average = self.average * 0.75 + level * 0.25
-		print("Audio Processing finished.")
+		logging.info("Audio Processing finished.")
 
 	def close(self):
 		self.is_run = False
@@ -134,11 +135,11 @@ class AlexaAudio:
 				if self.detect_buffer_max > self.average * DETECT_HYSTERESIS:
 					res = self.detect_buffer
 					self.capture_in_progress = False
-					print('Timeout exceed, phrase might not be completed')
+					logging.info('Timeout exceed, phrase might not be completed')
 					self.beep_finished()
 					return res
 				else:
-					print('Timeout exceed, but nothing was detected')
+					logging.info('Timeout exceed, but nothing was detected')
 					self.beep_failed()
 					return None
 		res = self.buffer

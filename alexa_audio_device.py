@@ -3,5 +3,5 @@
 try:
 	from alexa_audio_device_pulse import *
 except ImportError:
-	from alexa_audio_device_pyduio import *
+	from alexa_audio_device_pyaduio import *
 

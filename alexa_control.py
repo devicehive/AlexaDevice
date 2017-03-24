@@ -2,6 +2,7 @@
 
 import os
 import json
+import logging
 import alexa_params
 import alexa_device
 import alexa_http_config
@@ -14,7 +15,7 @@ def start():
 		return
 	alexa_config = alexa_http_config.load_config()
 	if alexa_config is not None:
-		print("Alexa found config.")
+		logging.info("Alexa found config.")
 		alexa = alexa_device.AlexaDevice(alexa_config)
 
 def close():

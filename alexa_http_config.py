@@ -151,3 +151,6 @@ class AlexaConfig(BaseHTTPRequestHandler):
 			self.wfile.write(bytes("<p><a href=/restart>Click here to restart Alexa.</a></p>", "utf-8"))
 			self.wfile.write(bytes("</body></html>", "utf-8"))
 
+	def log_message(self, format, *args):
+        	return
+
