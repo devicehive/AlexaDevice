@@ -73,8 +73,8 @@ class AlexaAudio:
 		while self.is_run:
 			buf = self.ad.read(16000)
 			if buf is None:
-				logging.info("Alexa audio processing exit")
-				break
+				time.sleep(0.5)
+				continue
 			if self.skip > 0:
 				self.skip -= len(buf)
 				continue
