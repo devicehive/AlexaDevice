@@ -4,9 +4,6 @@ import pyaudio
 import math
 import struct
 
-def cleanup():
-	pass
-
 class AlexaAudioDevice:
 	def __init__(self):
 		self.pa = pyaudio.PyAudio()

@@ -10,7 +10,7 @@ import alexa_audio
 
 class AlexaDevice:
 	def __init__(self, alexa_config):
-		self.alexa_audio_instance = alexa_audio.AlexaAudio(alexa_config['threshold'], self.send_audio)
+		self.alexa_audio_instance = alexa_audio.AlexaAudio(alexa_config['threshold'], alexa_config['audioDevice'], self.send_audio)
 		self.refresh_token = alexa_config['refresh_token']
 		self.client_id = alexa_config['Client_ID']
 		self.client_secret = alexa_config['Client_Secret']

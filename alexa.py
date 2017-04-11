@@ -8,6 +8,7 @@ import alexa_auth
 import alexa_audio_device
 
 def main():
+	alexa_audio_device.init()
 	alexa_auth.start()
 	try:
 		input("Press Enter to exit...\n")

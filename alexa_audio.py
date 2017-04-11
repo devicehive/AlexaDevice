@@ -15,8 +15,8 @@ DETECT_MAX_LENGTH_S = 10 # minimal amount of buffers to activate
 DETECT_BUFFERS_FOR_INIT = 10 # number of buffers for initialising
 
 class AlexaAudio:
-	def __init__(self, threshold, callback):
-		self.ad = alexa_audio_device.AlexaAudioDevice()
+	def __init__(self, threshold, deviceMac, callback):
+		self.ad = alexa_audio_device.get_audio_device(deviceMac)
 		self.callback = callback
 		self.beep_finished_buf = self._beep(150, 1000)
 		self.beep_short_buf = self._beep(150, 3000)

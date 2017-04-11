@@ -1,5 +1,5 @@
 name: alexa
-version: "1.1"
+version: "1.2"
 summary: Amazon Alexa snap
 description: Add Amazon Alexa to your device
 confinement: strict
@@ -8,22 +8,23 @@ apps:
   alexa:
     command: bin/alexa.py
     daemon: simple
-    plugs: [network, network-bind, pulseaudio]
+    plugs: [network, network-bind, pulseaudio, bluetooth-control, bluez]
   alexa-run:
     command: bin/alexa.py
-    plugs: [network, network-bind, pulseaudio]
+    plugs: [network, network-bind, pulseaudio, bluetooth-control, bluez]
 
 parts:
   python-hyper:
     plugin: python
     python-version: python3
-    python-packages: [requests, 'git+https://github.com/moaxey/python-zeroconf', pocketsphinx]
+    python-packages: [requests, 'git+https://github.com/moaxey/python-zeroconf', pocketsphinx, pybluez]
   pyalexa:
     plugin: dump
     source: ..
     organize:
       alexa.py: bin/alexa.py
       alexa_audio.py: bin/alexa_audio.py
+      alexa_audio_bt.py: bin/alexa_audio_bt.py
       alexa_audio_device.py: bin/alexa_audio_device.py
       alexa_audio_device_pulse.py: bin/alexa_audio_device_pulse.py
       alexa_auth.py: bin/alexa_auth.py
@@ -35,8 +36,11 @@ parts:
       - ffmpeg
       - libpulse0
       - pulseaudio
+      - bluez
     build-packages:
       - swig
       - git
       - libpulse-dev
+      - libbluetooth-dev
+      - gcc
 

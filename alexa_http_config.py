@@ -13,9 +13,10 @@ productId = alexa_params.DEFAULT_PRODUCT_ID
 clientId = alexa_params.DEFAULT_CLIEND_ID
 deviceSerial = alexa_params.DEFAULT_DEVICE_SERIAL
 clientSecret = alexa_params.DEFAULT_CLIENT_SECRET
+audioDevice = ""
 
 def load_config():
-	global clientId, clientSecret, threshold, deviceSerial, productId
+	global clientId, clientSecret, threshold, deviceSerial, productId, audioDevice
 	try:
 		with open(alexa_params.ALEXA_CREDENTIALS_FILE, 'r') as infile:
 			config = json.load(infile)
@@ -24,6 +25,7 @@ def load_config():
 			threshold = config['threshold']
 			deviceSerial = config['deviceSerial']
 			productId = config['productId']
+			audioDevice = config['audioDevice']
 			return config
 	except IOError:
 		pass
@@ -36,6 +38,7 @@ class AlexaConfig(BaseHTTPRequestHandler):
 		global clientId
 		global deviceSerial
 		global clientSecret
+		global audioDevice
 		ctype, pdict = parse_header(self.headers['content-type'])
 		if ctype == 'multipart/form-data':
 			postvars = parse_multipart(self.rfile, pdict)
@@ -49,6 +52,7 @@ class AlexaConfig(BaseHTTPRequestHandler):
 		clientId = b''.join(postvars.get(bytes("clientid", "utf-8"))).decode("utf-8")
 		deviceSerial = b''.join(postvars.get(bytes("serial", "utf-8"))).decode("utf-8")
 		clientSecret = b''.join(postvars.get(bytes("secret", "utf-8"))).decode("utf-8")
+		audioDevice = b''.join(postvars.get(bytes("audio", "utf-8"))).decode("utf-8")
 		self.send_response(200)
 		self.send_header("Content-type", "text/html")
 		self.end_headers()
@@ -100,7 +104,8 @@ class AlexaConfig(BaseHTTPRequestHandler):
 						"Client_ID": clientId,
 						"Client_Secret": clientSecret,
 						"deviceSerial": deviceSerial,
-						"productId": productId
+						"productId": productId,
+						"audioDevice": audioDevice
 					}
 					json.dump(data, outfile)
 				alexa_control.start()
@@ -140,6 +145,8 @@ class AlexaConfig(BaseHTTPRequestHandler):
 				<input type='text' name='serial' value='""" + deviceSerial + """'><br><br>
 				Client Secret:<br>
 				<input type='password' name='secret' value='""" + clientSecret + """'><br><br>
+				Bluetooth Audio Device MAC(example 11:22:33:44:55:66, leave empty to use local audio i.e. USB or 3.5mm device):<br>
+				<input type='text' name='audio' value='""" + audioDevice + """'><br><br>
 				<input type='submit' value='Log in'>
 				</form></body></html>
 			""", "utf-8"))
