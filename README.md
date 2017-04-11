@@ -7,8 +7,8 @@ Add `http://alexa.local:3000/authresponse` to `Allowed Return URLs` and `http://
 _Note this step can be skipped if you already have device profile credentials._
 * Install dependencies
 ```bash
-sudo apt install python3-pip git ffmpeg swig libportaudio2 portaudio19-dev libpulse-dev
-sudo pip3 install requests 'git+https://github.com/moaxey/python-zeroconf' pocketsphinx pyaudio
+sudo apt install python3-pip git ffmpeg swig libportaudio2 portaudio19-dev libpulse-dev gcc libbluetooth-dev
+sudo pip3 install requests 'git+https://github.com/moaxey/python-zeroconf' pocketsphinx pyaudio pybluez
 ```
 _Note 'libpulse-dev' should be installed only for PulseAudio based devices. 'pyaduio', 'libportaudio2' and 'portaudio19-dev' should be installed on other devices, for example alsa capable._
 * Make sure your system has PulseAudio support.
