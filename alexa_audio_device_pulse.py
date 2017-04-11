@@ -13,31 +13,29 @@ _PA_STREAM_PLAYBACK = 1
 _PA_STREAM_RECORD = 2
 _PA_SAMPLE_S16LE = 3
 
-def init():
-	global pa, in_stream, out_stream, error
-	error = ctypes.c_int(0)
-	pa = ctypes.cdll.LoadLibrary('libpulse-simple.so.0')
-	pa.strerror.restype = ctypes.c_char_p
-	ss = _struct_pa_sample_spec(_PA_SAMPLE_S16LE, 16000, 1)
+error = ctypes.c_int(0)
+pa = ctypes.cdll.LoadLibrary('libpulse-simple.so.0')
+pa.strerror.restype = ctypes.c_char_p
+ss = _struct_pa_sample_spec(_PA_SAMPLE_S16LE, 16000, 1)
 
-	out_stream = ctypes.c_void_p(pa.pa_simple_new(None,
-		'Alexa'.encode('ascii'), _PA_STREAM_PLAYBACK, None,
-		'Alexa voice'.encode('ascii'), ctypes.byref(ss),
-		None, None, ctypes.byref(error)))
-	if not out_stream:
-		raise Exception('Could not create pulse audio output stream: '
-			+ str(pa.strerror(error), 'ascii'))
+out_stream = ctypes.c_void_p(pa.pa_simple_new(None,
+	'Alexa'.encode('ascii'), _PA_STREAM_PLAYBACK, None,
+	'Alexa voice'.encode('ascii'), ctypes.byref(ss),
+	None, None, ctypes.byref(error)))
+if not out_stream:
+	raise Exception('Could not create pulse audio output stream: '
+		+ str(pa.strerror(error), 'ascii'))
 
-	in_stream = ctypes.c_void_p(pa.pa_simple_new(None,
-		'Alexa'.encode('ascii'), _PA_STREAM_RECORD, None,
-		'Alexa mic'.encode('ascii'), ctypes.byref(ss),
-		None, None, ctypes.byref(error)))
-	if not in_stream:
-		raise Exception('Could not create pulse audio input stream: '
-			+ str(pa.strerror(error), 'ascii'))
-	logging.info('PulseAudio is initialized.')
+in_stream = ctypes.c_void_p(pa.pa_simple_new(None,
+	'Alexa'.encode('ascii'), _PA_STREAM_RECORD, None,
+	'Alexa mic'.encode('ascii'), ctypes.byref(ss),
+	None, None, ctypes.byref(error)))
+if not in_stream:
+	raise Exception('Could not create pulse audio input stream: '
+		+ str(pa.strerror(error), 'ascii'))
+logging.info('PulseAudio is initialized.')
 
-def deinit():
+def cleanup():
 	pa.pa_simple_free(in_stream)
 	pa.pa_simple_free(out_stream)
 

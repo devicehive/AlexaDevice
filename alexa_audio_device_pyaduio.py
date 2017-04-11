@@ -4,10 +4,7 @@ import pyaudio
 import math
 import struct
 
-def init():
-	pass
-
-def deinit():
+def cleanup():
 	pass
 
 class AlexaAudioDevice:
