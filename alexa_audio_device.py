@@ -16,7 +16,6 @@ def cleanup():
 		alexa_audio_device_pulse.cleanup(pulse)
 
 def get_audio_device(macAddress):
-	global cleanupMethod
 	if macAddress:
 		import alexa_audio_bt
 		return alexa_audio_bt.BluetoothAudio(macAddress)
