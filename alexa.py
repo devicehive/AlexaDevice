@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import logging
-logging.basicConfig(level=logging.DEBUG, format='[%(asctime)s] %(message)s', 		datefmt='%d/%m/%Y %H:%M:%S')
+logging.basicConfig(level=logging.INFO, format='[%(asctime)s] %(message)s', 		datefmt='%d/%m/%Y %H:%M:%S')
 logging.getLogger("requests").setLevel(logging.CRITICAL)
 
 import alexa_auth

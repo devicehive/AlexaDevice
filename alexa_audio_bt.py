@@ -76,7 +76,7 @@ class BluetoothAudio:
 		logging.info('Read loop stop')
 
 	def _worker_loop(self):
-		logging.info('HFPDevice class is initialised')
+		logging.info('HFPDevice class is initialised, using ' + self.addr)
 		while self.wlt:
 			self._find_channel()
 			if not self.channel:
