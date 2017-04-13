@@ -12,7 +12,7 @@ from pocketsphinx import *
 DETECT_HYSTERESIS = 1.2 # level should fall lower that background noise
 DETECT_MIN_LENGTH_S = 2.5 # minimal length of record
 DETECT_MAX_LENGTH_S = 10 # minimal amount of buffers to activate
-DETECT_BUFFERS_FOR_INIT = 10 # number of buffers for initialising
+DETECT_BUFFERS_FOR_INIT = 5 # number of buffers for initialising
 
 class AlexaAudio:
 	def __init__(self, threshold, deviceMac, callback):

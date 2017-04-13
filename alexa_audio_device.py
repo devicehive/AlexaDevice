@@ -18,7 +18,8 @@ def cleanup():
 def get_audio_device(macAddress):
 	if macAddress:
 		import alexa_audio_bt
-		return alexa_audio_bt.BluetoothAudio(macAddress)
+		return alexa_audio_bt.BluetoothAudio(macAddress,
+			alexa_audio_bt.BluetoothAudio.AUDIO_16KHZ_SIGNED_16BIT_LE_MONO)
 	else:
 		if pulse:
 			import alexa_audio_device_pulse
