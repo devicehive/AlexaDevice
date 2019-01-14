@@ -2,7 +2,7 @@
 This project allows to launch Alexa on any Linux devices, even on embedded devices like Raspberry Pi (with usb headset).
 
 # Running
-* Follow this manual to create your own device and security profile - https://github.com/alexa/alexa-avs-sample-app/wiki/Create-Security-Profile  
+* Follow this manual to create your own device and security profile - https://github.com/alexa/avs-device-sdk/wiki/Create-Security-Profile  
 Add `http://alexa.local:3000/authresponse` to `Allowed Return URLs` and `http://alexa.local:3000` to `Allowed Origins`
 _Note this step can be skipped if you already have device profile credentials._
 * Install dependencies
